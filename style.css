@@ -1,0 +1,126 @@
+/* style.css */
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+:root {
+    --bg-color: #12181B;
+    --tile-color: #1E272E;
+    --border-color: #2C3A47;
+    --playerX-color: #0984e3;
+    --playerO-color: #e84393;
+    --text-color: #ecf0f1;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.background {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.title h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+.display {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+    background-color: var(--tile-color);
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    min-width: 160px; /* Prevents status bar from jittering text length */
+    text-align: center;
+}
+
+.display-player {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.playerX { color: var(--playerX-color); }
+.playerO { color: var(--playerO-color); }
+
+/* --- GAME BOARD FIX --- */
+.container {
+    display: grid;
+    /* Force 3 equal columns */
+    grid-template-columns: repeat(3, 1fr); 
+    /* Force 3 equal rows (THIS FIXES THE JUMPING) */
+    grid-template-rows: repeat(3, 1fr);    
+    gap: 5px;
+    background-color: var(--border-color);
+    
+    /* Fixed Dimensions */
+    width: 300px;
+    height: 300px;
+    
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    border-radius: 10px;
+    overflow: hidden; /* Ensures nothing spills out */
+}
+
+.tile {
+    background-color: var(--tile-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem; /* Large font */
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    user-select: none;
+    
+    /* Ensure the tile fills the grid cell exactly */
+    width: 100%; 
+    height: 100%;
+}
+
+.tile:hover {
+    background-color: #2a3640;
+}
+
+.tile.playerX { color: var(--playerX-color); }
+.tile.playerO { color: var(--playerO-color); }
+
+.controls {
+    margin-top: 25px;
+}
+
+#reset {
+    padding: 12px 25px;
+    background-color: var(--playerX-color);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+#reset:hover {
+    background-color: #74b9ff;
+    transform: translateY(-2px);
+}
+
+#reset:active {
+    transform: translateY(0);
+}

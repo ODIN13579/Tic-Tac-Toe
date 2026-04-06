@@ -1,0 +1,8 @@
+Tổng thể dự án:
+
+Game gồm 4 phần chính:
+
+- Giao diện (hiển thị bàn cờ)
+- Logic game (luật chơi)
+- AI (máy đánh)
+- Quản lý & tích hợp

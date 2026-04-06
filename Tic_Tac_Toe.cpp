@@ -66,14 +66,14 @@ inline char cellChar(int r, int c) { return (char)('1' + r * 3 + c); }
 int backtrackEval(bool isMaximizing, int depth) {// Điểm số cho MAX, có trừ đi depth để ưu tiên thắng sớm
     if (checkWin(COMP))   return +10 - depth;  // Thắng sớm được điểm cao hơn
     if (checkWin(PLAYER)) return -10 + depth;  // Thua sớm mất điểm nhiều hơn
-    if (isBoardFull())    return  0;
+    if (isBoardFull())    return  0;// Hòa
 
     if (isMaximizing) {// MAX muốn điểm cao nhất
         int best = INT_MIN;
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
                 if (isEmpty(i, j)) {
-                    board[i][j] = COMP;
+                    board[i][j] = COMP;// THỬ NƯỚC ĐI
                     int val = backtrackEval(false, depth + 1);
                     board[i][j] = cellChar(i, j);  // QUAY LUI: hoàn tác nước đi
                     if (val == 10 - depth) return val; // Cắt tỉa: nước thắng ngay lập tức

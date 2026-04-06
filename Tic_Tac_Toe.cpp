@@ -30,7 +30,6 @@ void show_board() {
     cout << "     |     |     \n\n";
 }
 
-
 bool checkWin(char mark) {
     for (int i = 0; i < 3; i++) {
         if (board[i][0] == mark && board[i][1] == mark && board[i][2] == mark) return true;
@@ -56,57 +55,10 @@ bool isEmpty(int r, int c) {
 inline char cellChar(int r, int c) { return (char)('1' + r * 3 + c); }
 
 // ============================================================
-//  THUẬT TOÁN 1: ĐỆ QUY (RECURSIVE MINIMAX)
-//  - Duyệt toàn bộ cây trò chơi bằng đệ quy
-//  - Không có tối ưu, không có ghi nhớ
-//  - Mỗi lần gọi đều tính lại từ đầu
-// ============================================================
-int recursive(bool isMaximizing) {
-    if (checkWin(COMP))   return +10;
-    if (checkWin(PLAYER)) return -10;
-    if (isBoardFull())    return  0;
-
-    if (isMaximizing) {
-        int best = INT_MIN;
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3; j++)
-                if (isEmpty(i, j)) {
-                    board[i][j] = COMP;
-                    best = max(best, recursive(false));
-                    board[i][j] = cellChar(i, j);
-                }
-        return best;
-    }
-    else {
-        int best = INT_MAX;
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3; j++)
-                if (isEmpty(i, j)) {
-                    board[i][j] = PLAYER;
-                    best = min(best, recursive(true));
-                    board[i][j] = cellChar(i, j);
-                }
-        return best;
-    }
-}
-
-void findBestMove_Recursive(int& bestRow, int& bestCol) {
-    int bestScore = INT_MIN;
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            if (isEmpty(i, j)) {
-                board[i][j] = COMP;
-                int score = recursive(false);
-                board[i][j] = cellChar(i, j);
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestRow = i; bestCol = j;
-                }
-            }
-}
-
-// ============================================================
-//  THUẬT TOÁN 2: QUAY LUI (BACKTRACKING)
+//  THUẬT TOÁN 1: QUAY LUI (BACKTRACKING)
+//  - Thử từng nước đi, nếu không hứa hẹn thì "quay lùi"
+//  - Có kiểm tra điều kiện cắt tỉa sớm (pruning thủ công)
+//  - Khác Greedy: có quay lùi và thử nước thay thế
 //  - Thử từng nước đi, nếu không hứa hẹn thì "quay lùi"
 //  - Có kiểm tra điều kiện cắt tỉa sớm (pruning thủ công)
 //  - Khác Greedy: có quay lùi và thử nước thay thế
@@ -160,7 +112,7 @@ void findBestMove_Backtrack(int& bestRow, int& bestCol) {
 }
 
 // ============================================================
-//  THUẬT TOÁN 3: THAM LAM (GREEDY)
+//  THUẬT TOÁN 2: THAM LAM (GREEDY)
 //  - Chỉ nhìn 1 bước, chọn nước tốt nhất ngay lập tức
 //  - Ưu tiên: Thắng ngay > Chặn đối thủ > Trung tâm > Góc > Cạnh
 //  - Không nhìn xa, có thể thua nếu đối thủ đặt bẫy 2 bước
@@ -201,7 +153,7 @@ void findBestMove_Greedy(int& bestRow, int& bestCol) {
 }
 
 // ============================================================
-//  THUẬT TOÁN 4: QUY HOẠCH ĐỘNG (DYNAMIC PROGRAMMING)
+//  THUẬT TOÁN 3: QUY HOẠCH ĐỘNG (DYNAMIC PROGRAMMING)
 //  - Giống Đệ quy nhưng lưu kết quả đã tính vào bảng memo
 //  - Nếu cùng trạng thái bàn cờ thì dùng lại, không tính lại
 //  - Tiết kiệm thời gian khi gặp trạng thái lặp lại
@@ -266,7 +218,7 @@ void findBestMove_DP(int& bestRow, int& bestCol) {
 }
 
 // ============================================================
-//  THUẬT TOÁN 5: MINIMAX + ALPHA-BETA PRUNING (TỐI ƯU NHẤT)
+//  THUẬT TOÁN 4: MINIMAX + ALPHA-BETA PRUNING (TỐI ƯU NHẤT)
 //  - Minimax: duyệt cây đầy đủ, MAX muốn điểm cao, MIN muốn thấp
 //  - Alpha-Beta: cắt tỉa các nhánh chắc chắn không ảnh hưởng kết quả
 //    + alpha: điểm tốt nhất MAX đảm bảo được (khởi đầu = -∞)
@@ -289,7 +241,7 @@ int minimax(bool isMaximizing, int alpha, int beta, int depth) {
                     board[i][j] = cellChar(i, j);
                     best = max(best, val);
                     alpha = max(alpha, best);
-                    if (beta <= alpha) goto done_max;  // CẮT BETA
+                    if (beta <= alpha) goto done_max;  
                 }
     done_max:
         return best;
@@ -304,7 +256,7 @@ int minimax(bool isMaximizing, int alpha, int beta, int depth) {
                     board[i][j] = cellChar(i, j);
                     best = min(best, val);
                     beta = min(beta, best);
-                    if (beta <= alpha) goto done_min;  // CẮT ALPHA
+                    if (beta <= alpha) goto done_min; 
                 }
     done_min:
         return best;
@@ -331,22 +283,18 @@ void AI_move() {
     int r = -1, c = -1;
     switch (algorithmChoice) {
     case 1:
-        cout << "[AI - De quy dang suy nghi...]\n";
-        findBestMove_Recursive(r, c);
-        break;
-    case 2:
         cout << "[AI - Quay lui (Backtracking) dang suy nghi...]\n";
         findBestMove_Backtrack(r, c);
         break;
-    case 3:
+    case 2:
         cout << "[AI - Tham lam (Greedy) dang suy nghi...]\n";
         findBestMove_Greedy(r, c);
         break;
-    case 4:
+    case 3:
         cout << "[AI - Quy hoach dong (DP) dang suy nghi...]\n";
         findBestMove_DP(r, c);
         break;
-    case 5:
+    case 4:
         cout << "[AI - Minimax + Alpha-Beta Pruning dang suy nghi...]\n";
         findBestMove_Minimax(r, c);
         break;
@@ -354,7 +302,6 @@ void AI_move() {
     if (r != -1 && c != -1)
         board[r][c] = COMP;
 }
-
 
 void playerMove() {
     int choice;
@@ -377,24 +324,23 @@ void playerMove() {
 
 void showMenu() {
     cout << "     CHON THUAT TOAN CHO AI\n";
-    cout << "  1. De quy            (Recursive)\n";
-    cout << "  2. Quay lui          (Backtracking)\n";
-    cout << "  3. Tham lam          (Greedy)\n";
-    cout << "  4. Quy hoach dong    (DP)\n";
-    cout << "  5. Minimax \n";
+    cout << "  1. Quay lui          (Backtracking)\n";
+    cout << "  2. Tham lam          (Greedy)\n";
+    cout << "  3. Quy hoach dong    (DP)\n";
+    cout << "  4. Minimax          \n";
     cout << "-----------------------------------\n";
-    cout << "Lua chon cua ban (1-5): ";
+    cout << "Lua chon cua ban (1-4): ";
     cin >> algorithmChoice;
-    if (algorithmChoice < 1 || algorithmChoice > 5) algorithmChoice = 5;
+    if (algorithmChoice < 1 || algorithmChoice > 4) algorithmChoice = 4;
 
-    string names[] = { "", "De quy (Recursive)", "Quay lui (Backtracking)",
+    string names[] = { "", "Quay lui (Backtracking)",
                        "Tham lam (Greedy)", "Quy hoach dong (DP)",
                        "Minimax + Alpha-Beta Pruning" };
     cout << "\n>> Ban da chon: " << names[algorithmChoice] << "\n";
 
-    if (algorithmChoice == 3)
+    if (algorithmChoice == 2)
         cout << "   [Ghi chu: Greedy co the bi danh bai!]\n";
-    else if (algorithmChoice == 5)
+    else if (algorithmChoice == 4)
         cout << "   [Ghi chu: AI nay bat bai - tot nhat la hoa!]\n";
 }
 
@@ -403,7 +349,6 @@ void resetBoard() {
         for (int j = 0; j < 3; j++)
             board[i][j] = cellChar(i, j);
 }
-
 
 int main() {
 #ifdef _WIN32

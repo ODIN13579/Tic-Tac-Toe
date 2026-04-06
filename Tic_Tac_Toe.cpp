@@ -63,12 +63,12 @@ inline char cellChar(int r, int c) { return (char)('1' + r * 3 + c); }
 //  - Có kiểm tra điều kiện cắt tỉa sớm (pruning thủ công)
 //  - Khác Greedy: có quay lùi và thử nước thay thế
 // ============================================================
-int backtrackEval(bool isMaximizing, int depth) {
+int backtrackEval(bool isMaximizing, int depth) {// Điểm số cho MAX, có trừ đi depth để ưu tiên thắng sớm
     if (checkWin(COMP))   return +10 - depth;  // Thắng sớm được điểm cao hơn
     if (checkWin(PLAYER)) return -10 + depth;  // Thua sớm mất điểm nhiều hơn
     if (isBoardFull())    return  0;
 
-    if (isMaximizing) {
+    if (isMaximizing) {// MAX muốn điểm cao nhất
         int best = INT_MIN;
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
@@ -96,7 +96,7 @@ int backtrackEval(bool isMaximizing, int depth) {
     }
 }
 
-void findBestMove_Backtrack(int& bestRow, int& bestCol) {
+void findBestMove_Backtrack(int& bestRow, int& bestCol) {// Điểm số tốt nhất cho MAX
     int bestScore = INT_MIN;
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)

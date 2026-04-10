@@ -48,66 +48,100 @@ bool isBoardFull() {
 }
 
 bool isEmpty(int r, int c) {
-    return board[r][c] != PLAYER && board[r][c] != COMP;
+    return board[r][c] != PLAYER && board[r][c] != COMP;// Kiểm tra ô có trống không
 }
 
 // Khôi phục ô về ký tự số ban đầu
-inline char cellChar(int r, int c) { return (char)('1' + r * 3 + c); }
+inline char cellChar(int r, int c) { return (char)('1' + r * 3 + c); }// Giúp hoàn tác nước đi khi quay lùi
+
 
 // ============================================================
-//  THUẬT TOÁN 1: QUAY LUI (BACKTRACKING)
-//  - Thử từng nước đi, nếu không hứa hẹn thì "quay lùi"
-//  - Có kiểm tra điều kiện cắt tỉa sớm (pruning thủ công)
-//  - Khác Greedy: có quay lùi và thử nước thay thế
-//  - Thử từng nước đi, nếu không hứa hẹn thì "quay lùi"
-//  - Có kiểm tra điều kiện cắt tỉa sớm (pruning thủ công)
-//  - Khác Greedy: có quay lùi và thử nước thay thế
+//  THUẬT TOÁN 1: QUAY LUI THUẦN TÚY (BACKTRACKING)
 // ============================================================
-int backtrackEval(bool isMaximizing, int depth) {// Điểm số cho MAX, có trừ đi depth để ưu tiên thắng sớm
-    if (checkWin(COMP))   return +10 - depth;  // Thắng sớm được điểm cao hơn
-    if (checkWin(PLAYER)) return -10 + depth;  // Thua sớm mất điểm nhiều hơn
-    if (isBoardFull())    return  0;// Hòa
+bool backtrackPure(bool isMaximizing) {
+    if (checkWin(COMP))   return true;
+    if (checkWin(PLAYER)) return false;
+    if (isBoardFull())    return false;
 
-    if (isMaximizing) {// MAX muốn điểm cao nhất
-        int best = INT_MIN;
+    if (isMaximizing) {// MAX (AI) cố gắng thắng
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
                 if (isEmpty(i, j)) {
-                    board[i][j] = COMP;// THỬ NƯỚC ĐI
-                    int val = backtrackEval(false, depth + 1);
-                    board[i][j] = cellChar(i, j);  // QUAY LUI: hoàn tác nước đi
-                    if (val == 10 - depth) return val; // Cắt tỉa: nước thắng ngay lập tức
-                    best = max(best, val);
+                    board[i][j] = COMP;
+
+                    if (backtrackPure(false)) {
+                        board[i][j] = cellChar(i, j);
+                        return true;
+                    }
+
+                    board[i][j] = cellChar(i, j);
                 }
-        return best;
-    }
-    else {
-        int best = INT_MAX;
+        return false;
+    } 
+    else {// Đối thủ đặt X, AI sẽ thử tất cả nước đi của đối thủ
         for (int i = 0; i < 3; i++)
             for (int j = 0; j < 3; j++)
                 if (isEmpty(i, j)) {
                     board[i][j] = PLAYER;
-                    int val = backtrackEval(true, depth + 1);
-                    board[i][j] = cellChar(i, j);  // QUAY LUI: hoàn tác nước đi
-                    if (val == -10 + depth) return val; // Cắt tỉa: đối thủ thắng ngay
-                    best = min(best, val);
+
+                    if (!backtrackPure(true)) {
+                        board[i][j] = cellChar(i, j);
+                        return false;
+                    }
+
+                    board[i][j] = cellChar(i, j);
                 }
-        return best;
+        return true;
     }
 }
-
-void findBestMove_Backtrack(int& bestRow, int& bestCol) {// Điểm số tốt nhất cho MAX
-    int bestScore = INT_MIN;
+void findBestMove_Backtrack(int& bestRow, int& bestCol) {// Tìm nước đi tốt nhất cho AI bằng thuật toán quay lui thuần túy
+    //  Máy thắng ngay nếu có
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             if (isEmpty(i, j)) {
                 board[i][j] = COMP;
-                int score = backtrackEval(false, 0);
+                bool win = checkWin(COMP);
                 board[i][j] = cellChar(i, j);
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestRow = i; bestCol = j;
+                if (win) {
+                    bestRow = i;
+                    bestCol = j;
+                    return;
                 }
+            }
+    // 🔥 BƯỚC 2: Chặn người nếu sắp thắng
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (isEmpty(i, j)) {
+                board[i][j] = PLAYER;
+                bool win = checkWin(PLAYER);
+                board[i][j] = cellChar(i, j);
+                if (win) {
+                    bestRow = i;
+                    bestCol = j;
+                    return;
+                }
+            }
+    // 🔥 BƯỚC 3: Dùng quay lui tìm đường thắng
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (isEmpty(i, j)) {
+                board[i][j] = COMP;
+
+                if (backtrackPure(false)) {
+                    bestRow = i;
+                    bestCol = j;
+                    board[i][j] = cellChar(i, j);
+                    return;
+                }
+                board[i][j] = cellChar(i, j);
+            }
+    // 🔥 BƯỚC 4: fallback (chọn ô đầu tiên)
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (isEmpty(i, j)) {
+                bestRow = i;
+                bestCol = j;
+                return;
             }
 }
 

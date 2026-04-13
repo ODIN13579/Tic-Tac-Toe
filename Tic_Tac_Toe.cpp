@@ -56,7 +56,7 @@ inline char cellChar(int r, int c) { return (char)('1' + r * 3 + c); }// Giúp h
 
 
 // ============================================================
-//  THUẬT TOÁN 1: QUAY LUI (BACKTRACKING)
+//  THUẬT TOÁN 1: QUAY LUI. (BACKTRACKING)
 // ============================================================
 bool backtrackPure(bool isMaximizing) {// true máy , false người
     if (checkWin(COMP))   return true;// Máy đã thắng

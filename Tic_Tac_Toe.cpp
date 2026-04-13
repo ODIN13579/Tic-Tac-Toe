@@ -56,7 +56,7 @@ inline char cellChar(int r, int c) { return (char)('1' + r * 3 + c); }// Giúp h
 
 
 // ============================================================
-//  THUẬT TOÁN 1: QUAY LUI THUẦN TÚY (BACKTRACKING)
+//  THUẬT TOÁN 1: QUAY LUI (BACKTRACKING)
 // ============================================================
 bool backtrackPure(bool isMaximizing) {// true máy , false người
     if (checkWin(COMP))   return true;// Máy đã thắng
@@ -120,7 +120,8 @@ void findBestMove_Backtrack(int& bestRow, int& bestCol) {// Tìm nước đi t�
                     return;
                 }
             }
-    // Dùng quay lui tìm đường thắng
+
+    // Dùng quay lui tìm đường thắng 
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             if (isEmpty(i, j)) {

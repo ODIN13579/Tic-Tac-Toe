@@ -192,12 +192,10 @@ void findBestMove_Greedy(int& bestRow, int& bestCol) {
 
 // ============================================================
 //  THUẬT TOÁN 3: QUY HOẠCH ĐỘNG (DYNAMIC PROGRAMMING)
-//  - Giống Đệ quy nhưng lưu kết quả đã tính vào bảng memo
-//  - Nếu cùng trạng thái bàn cờ thì dùng lại, không tính lại
+//  - Giống Backtracking nhưng lưu kết quả đã tính vào bảng memo=Memoization = kỹ thuật “ghi nhớ kết quả đã tính”
+//  - Nếu cùng trạng thái bàn cờ thì tra bảng, không tính lại
 //  - Tiết kiệm thời gian khi gặp trạng thái lặp lại
 // ============================================================
-unordered_map<string, int> memo;
-
 string boardToKey(bool isMax) {
     string key = "";
     for (int i = 0; i < 3; i++)
@@ -207,46 +205,56 @@ string boardToKey(bool isMax) {
     return key;
 }
 
-int dp(bool isMaximizing) {
-    if (checkWin(COMP))   return +10;
-    if (checkWin(PLAYER)) return -10;
-    if (isBoardFull())    return  0;
+int evaluateStateDP(bool aiTurn) {
+    if (checkWin(COMP))   return 1;
+    if (checkWin(PLAYER)) return -1;
+    if (isBoardFull())    return 0;
 
-    string key = boardToKey(isMaximizing);
-    if (memo.count(key)) return memo[key];  // Tra bảng nhớ
+    string key = boardToKey(aiTurn);
+    if (memo.count(key)) return memo[key];
 
-    if (isMaximizing) {
-        int best = INT_MIN;
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3; j++)
-                if (isEmpty(i, j)) {
-                    board[i][j] = COMP;
-                    best = max(best, dp(false));
-                    board[i][j] = cellChar(i, j);
+    bool hasDrawState = false;
+    int result = aiTurn ? -1 : 1;
+    char currentPlayer = aiTurn ? COMP : PLAYER;
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (!isEmpty(i, j)) continue;
+
+            board[i][j] = currentPlayer;
+            int nextState = evaluateStateDP(!aiTurn);
+            board[i][j] = cellChar(i, j);
+
+            if (aiTurn) {
+                if (nextState == 1) {
+                    memo[key] = 1;
+                    return 1;
                 }
-        return memo[key] = best;  // Lưu vào bảng nhớ
-    }
-    else {
-        int best = INT_MAX;
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3; j++)
-                if (isEmpty(i, j)) {
-                    board[i][j] = PLAYER;
-                    best = min(best, dp(true));
-                    board[i][j] = cellChar(i, j);
+                if (nextState == 0) hasDrawState = true;
+            }
+            else {
+                if (nextState == -1) {
+                    memo[key] = -1;
+                    return -1;
                 }
-        return memo[key] = best;  // Lưu vào bảng nhớ
+                if (nextState == 0) hasDrawState = true;
+            }
+        }
     }
+
+    if (hasDrawState) result = 0;
+    memo[key] = result;
+    return result;
 }
 
 void findBestMove_DP(int& bestRow, int& bestCol) {
     memo.clear();
-    int bestScore = INT_MIN;
+    int bestScore = -2;
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             if (isEmpty(i, j)) {
                 board[i][j] = COMP;
-                int score = dp(false);
+                int score = evaluateStateDP(false);
                 board[i][j] = cellChar(i, j);
                 if (score > bestScore) {
                     bestScore = score;

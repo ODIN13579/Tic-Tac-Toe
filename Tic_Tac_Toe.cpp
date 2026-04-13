@@ -57,6 +57,10 @@ inline char cellChar(int r, int c) { return (char)('1' + r * 3 + c); }// Giúp h
 
 // ============================================================
 //  THUẬT TOÁN 1: QUAY LUI. (BACKTRACKING)
+//  - Duyệt tất cả nước đi có thể, giả sử đối thủ chơi hoàn hảo
+//  - Nếu có nước đi nào dẫn đến chiến thắng thì chọn, nếu không thì chọn nước đi nào cũng được
+//  - Đảm bảo không thua, nhưng có thể không thắng được nếu đối thủ cũng chơi hoàn hảo
+// - Thời gian: O(9!) trong trường hợp xấu nhất (bàn cờ trống hoàn toàn)
 // ============================================================
 bool backtrackPure(bool isMaximizing) {// true máy , false người
     if (checkWin(COMP))   return true;// Máy đã thắng
